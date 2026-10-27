@@ -1,0 +1,47 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Card {
+  id                String      @id @default(uuid())
+  card_code         String      @unique
+  username          String
+  password_hash     String
+  is_configured     Boolean     @default(false)
+  shop_name         String?
+  business_category String?
+  keywords          String?
+  logo_url          String?
+  google_review_url String?
+  whatsapp_url      String?
+  instagram_url     String?
+  cached_reviews    String?     // JSON string of cached AI reviews
+  expires_at        DateTime?
+  scan_count        Int         @default(0)
+  review_clicks     Int         @default(0)
+  whatsapp_clicks   Int         @default(0)
+  instagram_clicks  Int         @default(0)
+  created_at        DateTime    @default(now())
+  updated_at        DateTime    @updatedAt
+  events            CardEvent[]
+
+  @@index([card_code])
+}
+
+model CardEvent {
+  id         String   @id @default(uuid())
+  card_id    String
+  card       Card     @relation(fields: [card_id], references: [id], onDelete: Cascade)
+  event_type String   // scan, review_click, whatsapp_click, instagram_click
+  user_agent String?
+  created_at DateTime @default(now())
+
+  @@index([card_id])
+  @@index([event_type])
+  @@index([created_at])
+}
